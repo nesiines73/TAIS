@@ -8,14 +8,14 @@
 
 bool resuleveCaso() {
 	unsigned int numElem;
-	
+
 	std::cin >> numElem;
 	if (numElem == 0) return false;
 
 	int claves;
 	int m;
 	int posicion;
-	
+
 	map<int, int, std::less<int>> arbol;
 	for (int i = 0; i < numElem; i++) {
 		std::cin >> claves;
@@ -37,16 +37,16 @@ bool resuleveCaso() {
 }
 
 int main() {// ajustes para que cin extraiga directamente de un fichero
-	#ifndef DOMJUDGE
-        std::ifstream in("casos.txt");
-        auto cinbuf = std::cin.rdbuf(in.rdbuf());
-    #endif
-    
-    while(resuleveCaso());
-    // para dejar todo como estaba al principio
-    #ifndef DOMJUDGE
-        std::cin.rdbuf(cinbuf);
-        //system("PAUSE");
-    #endif
-    return 0;
+#ifndef DOMJUDGE
+	std::ifstream in("casos.txt");
+	auto cinbuf = std::cin.rdbuf(in.rdbuf());
+#endif
+
+	while (resuleveCaso());
+	// para dejar todo como estaba al principio
+#ifndef DOMJUDGE
+	std::cin.rdbuf(cinbuf);
+	//system("PAUSE");
+#endif
+	return 0;
 }
