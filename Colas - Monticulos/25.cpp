@@ -25,7 +25,8 @@ public:
     }
 };
 
-//Coste O(logn)
+//CORREGIDO
+//Coste O(n), siendo n el número de partituras.
 bool resuelveCaso(){
     unsigned int partituras, instrumentos, musicos, resultado;
     std::cin >> partituras;
