@@ -7,7 +7,7 @@
 Lo que se hace es una priority queue de las cajas actuales y una cola con los clientes en las
 que se pone su tiempo, los clientes se van asignando a las cajas y cuando las cajas se han agotado
 se expulsa al cliente que menos tiempo tarda y se agrega al siguiente que hay en la cola.
-Coste O(n)
+Coste O(logn)
 */
 
 #include <iostream>
@@ -24,7 +24,7 @@ public:
 	};
 
 	bool operator() (const caja &c1, const caja &c2) {
-		return c1.tiempo < c2.tiempo;
+		return c1.tiempo < c2.tiempo || (c1.tiempo == c2.tiempo && c1.orden < c2.orden);
 	}
 
 
@@ -53,9 +53,9 @@ bool resuelveCaso() {
 
    for (int i = 0; i < C; ++i) {
 	   if (i >= N) {
-		   int caja = cola.top().orden;
+           Cajas::caja c = cola.top();
 		   cola.pop();
-		   cola.push({ caja, clientes.front() });
+		   cola.push({ c.orden, clientes.front() + c.tiempo });
 	   }
 	   else {
 		   cola.push({ i + 1, clientes.front() });
