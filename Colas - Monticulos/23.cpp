@@ -73,13 +73,13 @@ bool resuleveCaso() {
     }
     
     while (!tareas.empty() && !solapa && m < minutos) {
-        Tarea tarea = tareas.top(); tareas.pop();
+        Tarea tarea1 = tareas.top(); tareas.pop();
             
-        if ((tarea.inicio < ocupacion) || (!tareas.empty() && tarea.inicio != minutos && tarea.inicio == tareas.top().inicio)) solapa = true;
+        if (tarea1.inicio < minutos && ((tarea1.inicio < ocupacion) || (!tareas.empty() && tarea1.inicio == tareas.top().inicio))) solapa = true;
         else {
-            ocupacion = tarea.fin;
-            if (tarea.repe > 0) tareas.insertar(tarea.inicio+tarea.repe, tarea.fin+tarea.repe,tarea.repe);
-            m = tarea.fin;
+            ocupacion = tarea1.fin;
+            m = tarea1.inicio;
+            if (tarea1.repe > 0) tareas.insertar(tarea1.inicio+tarea1.repe, tarea1.fin+tarea1.repe,tarea1.repe);
         }
     }
     
