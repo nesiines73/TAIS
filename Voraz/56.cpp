@@ -12,6 +12,10 @@ struct Horario {
     bool operator<(Horario const &c) const{
         return horaIni < c.horaIni || (horaIni == c.horaIni && horaFin < c.horaFin);
     }
+
+	bool operator>(Horario const &c) const {
+		return c.horaFin > horaFin || (horaFin == c.horaFin && c.horaIni > horaIni);
+	}
 };
 
 void resuelveCaso(int numConf) {
@@ -25,7 +29,7 @@ void resuelveCaso(int numConf) {
     
     std::sort(v.begin(), v.end());
     
-    PriorityQueue<Horario> alumnos;
+    PriorityQueue<Horario, std::greater<Horario>> alumnos;
     
     int companhero = 0;
     
