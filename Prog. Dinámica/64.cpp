@@ -1,3 +1,4 @@
+//TAIS57
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -5,48 +6,61 @@
 #include <string>
 #include "Matriz.h"
 
+/*
+ 
+ palindromo(i,j) = longitud máxima del palíndromo a partir de la palabra original que va de i a j.
+ 
+ Caso base:
+    palindromo(i,j) = 1 si i == j
+ 
+ Caso recursivo:
+    palindromo(i,j) = 2 + palindromo(i+1,j-1) si pal[i] == pal[j]
+    palindromo(i,j) = max(palindromo(i+1,j), palindromo(i,j-1)) si pal[i] != pal[j]
+ 
+ COSTE
+    O(n^2 + nuevaPalabra) tanto en tiempo como en espacio, siendo n el número de letras de la palabra original.
+*/
+
 
 std::string resuelve(std::string const& word) {
     int n = word.length();
-    Matriz<int> longitudPalindromos(n, n, 0);
+    Matriz<int> palindromos(n + 1, n + 1, 0);
     
-    for (int i = 0; i < n; i++)
-        longitudPalindromos[i][i] = 1;
+    for (int i = 1; i <= n; ++i)
+        palindromos[i][i] = 1;
     
-    for (int d = 1; d < n; ++d) { // recorre diagonales
-        for (int i = 0; i < n - d; ++i) { // recorre elementos de diagonal
+    for (int d = 1; d <= n - 1; ++d) { // recorre diagonales
+        for (int i = 1; i <= n - d; ++i) { // recorre elementos de diagonal
             int j = i + d;
-            if (word[i] == word[j])
-                longitudPalindromos[i][j] = longitudPalindromos[i + 1][j - 1] + 2;
+            if (word[i-1] == word[j-1])
+                palindromos[i][j] = palindromos[i + 1][j - 1] + 2;
             else
-                longitudPalindromos[i][j] = std::max(longitudPalindromos[i + 1][j], longitudPalindromos[i][j - 1]);
+                palindromos[i][j] = std::max(palindromos[i + 1][j], palindromos[i][j - 1]);
         }
     }
     
-    int max = longitudPalindromos[0][n - 1];
+    int max = palindromos[1][n];
     std::string resultado(max, '\0');
     
-    int j = n - 1, i = 0, pos = 0;
-    while (pos * 2 < max) {
-        if (max - (pos * 2) == 1) {
-            resultado[pos] = word[j];
-            pos++;
-            i++;
-            j--;
+    int j = n, i = 1, iRes = 0, jRes = max - 1;
+    while (max >= 0) {
+        if (word[i-1] == word[j-1]) {
+            resultado[iRes] = word[i-1];
+            resultado[jRes] = word[j-1];
+            ++i; ++iRes;
+            --j; --jRes;
+            max -= 2;
         }
-        else {
-            if (word[i] == word[j]) {
-                resultado[pos] = word[j];
-                resultado[max - pos - 1] = word[j];
-                pos++;
-                i++;
-                j--;
-            }
-            else if (longitudPalindromos[i][j - 1] <= longitudPalindromos[i + 1][j])
-                i++;
+        else if (max == 0) {
+            resultado[iRes] = word[j-1];
+            --max;
+        } else if (word[i-1] != word[j-1]) {
+            if (palindromos[i][j - 1] <= palindromos[i + 1][j])
+                ++i;
             else
-                j--;
+                --j;
         }
+            
     }
     return resultado;
 }
