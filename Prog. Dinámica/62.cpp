@@ -1,25 +1,33 @@
+//TAIS57
 #include <iostream>
 #include <vector>
 #include <fstream>
 #include <algorithm>
 #include "Matriz.h"
 
+/*
+ tablero(i,j) = Maximo valor posible hasta la fila i y la columna j del mismo.
 
-void resuelve(Matriz<int> const& matOriginal, int &colIni, int &sumaTotal, const int &N) {
-    Matriz<int> matriz(N+1, N+2, 0);
+ tablero(i,j) = max(tablero[i-1][j-1],tablero[i-1][j],tablero[i-1][j+1]) + tablero[i][j]
+ 
+ Costes:
+    O(N^2) en espacio.
+    O(N^2 + N) en tiempo
+ */
+
+void resuelve(Matriz<int> &tablero, int &colIni, int &sumaTotal, const int &N) {
     
-    for (int f = 1; f <= N; ++f) {
-        for (int c = 1; c <= N; ++c) {
-            matriz[f][c] = std::max(matOriginal[f][c] + matriz[f-1][c-1], std::max(matOriginal[f][c] + matriz[f-1][c], matOriginal[f][c] + matriz[f-1][c+1]));
-        }
+    for (int i = 1; i <= N; ++i) {
+        for (int j = 1; j <= N; ++j)
+            tablero[i][j] = std::max(tablero[i-1][j-1], std::max(tablero[i-1][j],  tablero[i-1][j+1])) + tablero[i][j];
     }
     
-    sumaTotal = matriz[N][0];
+    sumaTotal = tablero[N][0];
     colIni = 0;
     
     for (int i = 1; i <= N; ++i) {
-        if (sumaTotal < matriz[N][i]) {
-            sumaTotal = matriz[N][i];
+        if (sumaTotal < tablero[N][i]) {
+            sumaTotal = tablero[N][i];
             colIni = i;
         }
     }
@@ -33,7 +41,7 @@ bool resuelveCaso() {
     
     if (!std::cin) return false;
     
-    Matriz<int> mat(N+1, N+1);
+    Matriz<int> mat(N+1, N+2, 0);
     for (int i = 1; i <= N; ++i) {
         for (int n = 1; n <= N; ++n)
             std::cin >> mat[i][n];
