@@ -4,34 +4,51 @@
 #include <algorithm>
 #include "Matriz.h"
 
+/*
+ 
+ cazatesoros(i,j) = cantidad máxima de cofres i que se pueden recuperar en el tiempo j.
+ 
+ Casos bases:
+    cazatesoros(i,0) = 0
+    cazatesoros(0,j) = 0
+ 
+ Caso recursivo:
+     cazatesoros(i,j) = cazatesoros(i-1,j) si tiempo[i] > j
+     cazatesoros(i,j) = max(cazatesoros(i-1,j), cazatesoros(i-1,j-tiempo[i]) + oro[i]) si tiempo[i] <= j
+ 
+ Coste:
+    O(n*T) tanto en espacio como en tiempo, siendo n los cofres y T los tiempos.
+ 
+*/
+
 struct Tesoro {
-    int prof;
-    int cant;
+    int tiempo;
+    int oro;
 };
 
 void recogeTesoros(std::vector<Tesoro> const& tesoros, int T, int & maximoRecogible, int & cuantos, std::vector<bool> & cuales) {
-    int n = tesoros.size() - 1;
-    Matriz<int> mochila(n + 1, T + 1, 0);
+    int N = tesoros.size() - 1;
+    Matriz<int> cazatesoros(N + 1, T + 1, 0);
     
-    for (int i = 1; i <= n; ++i) {
+    for (int i = 1; i <= N; ++i) {
         for (int j = 1; j <= T; ++j) {
-            if (tesoros[i].prof * 3 > j)
-                mochila[i][j] = mochila[i - 1][j];
+            if (tesoros[i].tiempo > j)
+                cazatesoros[i][j] = cazatesoros[i - 1][j];
             else
-                mochila[i][j] = std::max(mochila[i - 1][j], mochila[i - 1][j - (tesoros[i].prof * 3)] + tesoros[i].cant);
+                cazatesoros[i][j] = std::max(cazatesoros[i - 1][j], cazatesoros[i - 1][j - tesoros[i].tiempo] + tesoros[i].oro);
         }
     }
-    maximoRecogible = mochila[n][T];
+    maximoRecogible = cazatesoros[N][T];
     
     int resto = T;
-    for (int i = n; i >= 1; --i) {
-        if (mochila[i][resto] == mochila[i - 1][resto]) {
+    for (int i = N; i >= 1; --i) {
+        if (cazatesoros[i][resto] == cazatesoros[i - 1][resto]) {
             cuales[i] = false;
         }
         else {
             cuales[i] = true;
-            resto = resto - (tesoros[i].prof * 3);
-            cuantos++;
+            resto = resto - tesoros[i].tiempo;
+            ++cuantos;
         }
     }
 }
@@ -44,7 +61,8 @@ bool resuelveCaso() {
     
     std::vector<Tesoro> tesoros(N + 1);
     for (int i = 1; i <= N; i++) {
-        std::cin >> tesoros[i].prof >> tesoros[i].cant;
+        std::cin >> tesoros[i].tiempo >> tesoros[i].oro;
+        tesoros[i].tiempo *= 3;
     }
     
     int maximoRecogible = 0, cuantos = 0;
@@ -55,7 +73,7 @@ bool resuelveCaso() {
     std::cout << cuantos << "\n";
     for (int i = 1; i <= N; ++i) {
         if (cuales[i])
-            std::cout << tesoros[i].prof << " " << tesoros[i].cant << "\n";
+            std::cout << tesoros[i].tiempo / 3 << " " << tesoros[i].oro << "\n";
     }
     std::cout << "----\n";
     
