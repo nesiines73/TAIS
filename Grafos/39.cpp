@@ -5,52 +5,72 @@
 #include "IndexPQ.h"
 #include "GrafoDirigidoValorado.h"
 
+const int MAX = std::numeric_limits<int>::max();
+
 //Dijkstra
-int resuelve(const GrafoDirigidoValorado<int> &G, const std::vector<int> &repartos, const int &O) {
-    std::vector<AristaDirigida<int>> edgeTo(G.V(), {0 , 0, std::numeric_limits<int>::max()});
-    std::vector<int> distTo(G.V(), std::numeric_limits<int>::max());
-    IndexPQ<int, std::less<int>> pq(G.V());
-    bool imposible = false;
-    
-    distTo[O] = 0;
-    pq.push(O, 0);
-    
-    while (!pq.empty()) {
-        int v = pq.top().elem;
-        pq.pop();
-        for (AristaDirigida<int> e: G.ady(v)) {
-            int v = e.from(), w = e.to();
-            if (distTo[w] > distTo[v] + e.valor()) {
-                distTo[w] = distTo[v] + e.valor();
-                pq.update(w, distTo[w]);
-            }
-            AristaDirigida<int> temp(e.from(), e.to(), distTo[v] + e.valor());
-            if (edgeTo[e.from()].valor() > temp.valor())
-                edgeTo[e.from()] = temp;
+class Amazon {
+public:
+    Amazon (const GrafoDirigidoValorado<int> & GDV, int o) : distTo(GDV.V(), MAX),
+    pq(GDV.V()), esPosible(true), tiempo(0), distGoBack(GDV.V(), MAX) {
+        
+        GrafoDirigidoValorado<int> inverso = GDV.inverso();
+        
+        distGoBack[o] = 0;
+        pq.push(o, 0.0);
+        
+        while (!pq.empty()) {
+            auto v = pq.top();
+            pq.pop();
+            for (auto w : inverso.ady(v.elem))
+                relaxInv(w);
+        }
+        
+        distTo[o] = 0;
+        pq.push(o, 0.0);
+        
+        while (!pq.empty()) {
+            auto v = pq.top();
+            pq.pop();
+            for (auto w : GDV.ady(v.elem))
+                relax(w);
         }
     }
     
-    for (int i = 1; i < repartos.size() && !imposible; ++i) {
-        if (edgeTo[repartos[i]].to() == 0)
-            imposible = true;
-        else if (edgeTo[repartos[i]].to() != O) {
-            int from = repartos[i], to = edgeTo[repartos[i]].to();
-            while (to != from && to != O) {
-                from = edgeTo[repartos[i]].to();
-                to = edgeTo[from].to();
-            } if (to != O)
-                imposible = true;
-            else
-                distTo[O] += edgeTo[from].valor() ;
+    int getSol(const int &o, const std::vector<int> &sended) {
+        for (int i = 1; i < sended.size(); ++i){
+            if (distTo[sended[i]] == MAX || distGoBack[sended[i]] == MAX)
+                esPosible = false;
+            tiempo += distTo[sended[i]] + distGoBack[sended[i]];
         }
-        else
-            distTo[O] += edgeTo[repartos[i]].valor();
+        if (!esPosible) return -1;
+        else return tiempo;
     }
     
-    if (imposible) return -1;
-    return distTo[O];
     
-}
+private:
+    int tiempo;
+    bool esPosible;
+    IndexPQ<double> pq;
+    std::vector<int> distTo;
+    std::vector<int> distGoBack;
+    
+    void relax(const AristaDirigida<int> & e) {
+        int v = e.from(), w = e.to();
+        if (distTo[w] > distTo[v] + e.valor()) {
+            distTo[w] = distTo[v] + e.valor();
+            pq.update(e.to(), distTo[w]);
+        }
+        
+    }
+    void relaxInv(const AristaDirigida<int> & e) {
+        int v = e.from(), w = e.to();
+        if (distGoBack[w] > distGoBack[v] + e.valor()) {
+            distGoBack[w] = distGoBack[v] + e.valor();
+            pq.update(e.to(), distGoBack[w]);
+        }
+        
+    }
+};
 
 bool resuelveCaso() {
     int N, C, O, R;
@@ -65,8 +85,7 @@ bool resuelveCaso() {
     for (int i = 0; i < C; ++i) {
         int A, B, coste;
         std::cin >> A >> B >> coste;
-        AristaDirigida<int> temp(A, B, coste);
-        g.ponArista(temp);
+        g.ponArista(AristaDirigida<int>(A, B, coste));
     }
     
     std::cin >> O >> R;
@@ -76,14 +95,11 @@ bool resuelveCaso() {
     for (int i = 1; i <= R; ++i)
         std::cin >> repartos[i];
     
-    if (g.V() == 2) std::cout << "Imposible\n";
+    Amazon prime(g, O);
     
-    else {
-        int sol = resuelve(g, repartos, O);
-        
-        if (sol == -1) std::cout << "Imposible\n";
-        else std::cout << sol << "\n";
-    }
+    int sol = prime.getSol(O, repartos);
+    if (sol == -1) std::cout << "Imposible\n";
+    else std::cout << sol << "\n";
     
     return true;
 }
