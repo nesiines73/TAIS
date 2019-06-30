@@ -1,73 +1,84 @@
+//TAIS57
 #include <iostream>
 #include <vector>
 #include <fstream>
-#include "Matriz.h"
 
+/*
+     Coste O(L)
+     varillas[j] = varillas[j] si longitud de varilla j > j
+     varillas[j] = varillas[j] || varillas[j - listaVarillas[i].longitud] si longitud de varilla j < j con que una de las dos sea manera nos vale para ver si podemos llegar a L.
+     varillas[j]= 1 (o true) si longitud de varilla j = j ya que podemos utilizar esa varilla.
+ */
 bool esPosible(const std::vector<int> &varillas, const int &L) {
     
-    Matriz<bool> posible(varillas.size(), L + 1, false);
-    posible[0][0] = true;
+    std::vector<bool> posible(L + 1, false);
+    posible[0] = true;
     
-    for (int i = 1; i <= varillas.size() - 1; ++i) {
-        posible[i][0] = true;
-        for (int j = 1; j <= L; ++j) {
-            if (varillas[i] > j)
-                posible[i][j] = posible[i - 1][j];
-            else
-                posible[i][j] = (posible[i - 1][j]) ? posible[i - 1][j] : posible[i - 1][j - varillas[i]];
+    for (int i = 1; i <= varillas.size(); ++i) {
+        for (int j = L; j >= 1; --j) {
+            if (varillas[i - 1] <= j)
+                posible[j] = posible[j] || posible[j - varillas[i - 1]];
         }
     }
-    return posible[varillas.size() - 1][L];
+    return posible[L];
 }
 
+/*
+     Coste O(L)
+     varillas[j] = varillas[j] si longitud de varilla j > j
+     varillas[j] = varillas[j] + varillas[j - listaVarillas[i].longitud] si longitud de varilla j <= j ahora sumamos ya ambas son maeras de llegar a la varilla L.
+ */
 int formas(const std::vector<int> &varillas, const int &L) {
-    Matriz<int> formas(varillas.size(), L + 1, 0);
+    std::vector<int> formas(L + 1, 0);
     
-    formas[0][0] = 1;
+    formas[0] = 1;
     
-    for (int i = 1; i <= varillas.size() - 1; ++i) {
-        formas[i][0] = 1;
-        for (int j = 1; j <= L; ++j) {
-            if (varillas[i] > j)
-                formas[i][j] = formas[i - 1][j];
-            else
-                formas[i][j] = formas[i - 1][j] + formas[i - 1][j - varillas[i]];
+    for (int i = 1; i <= varillas.size(); ++i) {
+        for (int j = L; j >= 1; --j) {
+            if (varillas[i - 1] <= j)
+                formas[j] = formas[j] + formas[j - varillas[i - 1]];
         }
     }
-    return formas[varillas.size() - 1][L];
+    return formas[L];
 }
 
+/*
+     Coste O(L)
+     varillas[j]= varillas[j] si longitud de varilla j > j
+     varillas[j]= std::min(varillas[j] , varillas[j - listaVarillas[i].longitud]+1) nos quedamos con la menor de las dos maneras.
+ */
 int nVarillas(const std::vector<int> &varillas, const int &L) {
-    Matriz<int> nVarillas(varillas.size(), L + 1, 1e9);
+    std::vector<int> nVarillas(L + 1, 1e9);
     
-    nVarillas[0][0] = 0;
+    nVarillas[0] = 0;
     
-    for (int i = 1; i <= varillas.size() - 1; ++i) {
-        nVarillas[i][0] = 0;
-        for (int j = 1; j <= L; ++j) {
-            if (varillas[i] > j)
-                nVarillas[i][j] = nVarillas[i - 1][j];
-            else
-                nVarillas[i][j] = std::min(nVarillas[i - 1][j], nVarillas[i - 1][j - varillas[i]] + 1);
+    for (int i = 1; i <= varillas.size(); ++i) {
+        for (int j = L; j >= 1; --j) {
+            if (varillas[i - 1] <= j)
+                nVarillas[j] = std::min(nVarillas[j], nVarillas[j - varillas[i - 1]] + 1);
         }
     }
-    return nVarillas[varillas.size() - 1][L];
+    return nVarillas[L];
 }
 
+/*
+     Coste O(L)
+     varillas[j] = varillas[j] si longitud de varilla j > j
+     varillas[j] = std::min(varillas[j] , varillas[j - listaVarillas[i].longitud] + listaVarillas[i].longitud] + listaVarillas[i].precio)  si longitud de varilla j >= j
+     nos quedamos con la menor de las dos maneras, pero ahora teniendo en cuenta el precio.
+ */
 int precio(const std::vector<int> &varillas, const int &L, const std::vector<int> &precios) {
-    Matriz<int> precio(varillas.size(), L + 1, 1e9);
-    precio[0][0] = 0;
+    
+    std::vector<int> precio(L + 1, 1e9);
+    precio[0] = 0;
         
-    for (int i = 1; i <= varillas.size() - 1; ++i) {
-        precio[i][0] = 0;
-        for (int j = 1; j <= L; ++j) {
-            if (varillas[i] > j)
-                precio[i][j] = precio[i - 1][j];
-            else
-                precio[i][j] = std::min(precio[i - 1][j], precio[i - 1][j - varillas[i]] + precios[i]);
+    for (int i = 1; i <= varillas.size(); ++i) {
+        for (int j = L; j >= 1; --j) {
+            if (varillas[i - 1] <= j)
+                precio[j] = std::min(precio[j], precio[j - varillas[i - 1]] + precios[i - 1]);
         }
     }
-    return precio[varillas.size() - 1][L];
+    return precio[L];
 }
 
 bool resuelveCaso() {
